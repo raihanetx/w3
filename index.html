@@ -3106,8 +3106,8 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
             <div id="descriptionTab" class="tab-content" style="display:block;">
                 <div class="expandable-content">
                     <p>${product.longDescription || product.description || 'An exceptional digital product.'}</p>
-                    <button class="see-more-btn" onclick="toggleSeeMore(this)">See More</button>
                 </div>
+                <button class="see-more-btn" onclick="toggleSeeMore(this)">See More</button>
                 <button class="see-less-btn" onclick="toggleSeeMore(this, true)" style="display:none;">See Less</button>
             </div>
             <div id="reviewsTab" class="tab-content" style="display:none;">
@@ -3285,8 +3285,8 @@ function generateReviewsHTML(productId) {
     return `
         <div class="expandable-content">
             ${reviewsList}
-            ${reviews.length > 3 ? '<button class="see-more-btn" onclick="toggleSeeMore(this)">See More</button>' : ''}
         </div>
+        ${reviews.length > 3 ? '<button class="see-more-btn" onclick="toggleSeeMore(this)">See All Reviews</button>' : ''}
         ${reviews.length > 3 ? '<button class="see-less-btn" onclick="toggleSeeMore(this, true)" style="display:none;">See Less</button>' : ''}
         ${reviewFormHTML}
     `;
