@@ -672,19 +672,31 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         #reviewsTab .expandable-content {
             max-height: 220px; /* about 2-3 reviews */
         }
-        .see-less-btn {
-            background: none;
-            border: none;
-            color: var(--primary-color);
+
+        .reviewer-profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
             font-weight: bold;
-            cursor: pointer;
-            padding: 0.5rem;
-            margin-top: 0.5rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
         }
 
         .review {
+            display: flex;
+            align-items: flex-start;
             border-bottom: 1px solid #eee;
             padding: 1rem 0;
+        }
+
+        .review-content {
+            flex-grow: 1;
         }
 
         .review:last-child {
@@ -707,9 +719,24 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         }
 
         #reviewForm label {
-            display: block;
-            margin-bottom: 0.5rem;
+            display: none; /* Hide labels */
+        }
+
+        #reviewForm input[type="text"],
+        #reviewForm textarea {
+            border: 1px solid #ddd;
+            background-color: #f8f9fa;
+        }
+
+        .rating-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .rating-label {
             font-weight: 600;
+            color: #555;
         }
 
         #reviewForm input[type="text"],
@@ -3071,7 +3098,6 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
                     <p>${product.longDescription || product.description || 'An exceptional digital product.'}</p>
                     <button class="see-more-btn" onclick="toggleSeeMore(this)">See More</button>
                 </div>
-                <button class="see-less-btn" onclick="toggleSeeMore(this, true)" style="display:none;">See Less</button>
             </div>
             <div id="reviewsTab" class="tab-content" style="display:none;">
                 ${generateReviewsHTML(product.id)}
@@ -3155,6 +3181,19 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
         });
     }
 
+    // Show "See More" buttons only if content overflows
+    const descriptionContent = detailPageElement.querySelector('#descriptionTab .expandable-content');
+    if (descriptionContent.scrollHeight <= 150) { // 150 is the max-height
+        const seeMoreBtn = descriptionContent.querySelector('.see-more-btn');
+        if (seeMoreBtn) seeMoreBtn.style.display = 'none';
+    }
+
+    const reviewsContent = detailPageElement.querySelector('#reviewsTab .expandable-content');
+    if (reviewsContent && reviewsContent.scrollHeight <= 220) { // 220 is the max-height
+        const seeMoreBtn = reviewsContent.querySelector('.see-more-btn');
+        if (seeMoreBtn) seeMoreBtn.style.display = 'none';
+    }
+
     setupRelatedProductImages();
 }
 
@@ -3172,16 +3211,9 @@ function openTab(evt, tabName) {
     evt.currentTarget.className += " active";
 }
 
-function toggleSeeMore(btn, seeLess = false) {
-    const expandableContent = btn.closest('.tab-content').querySelector('.expandable-content');
-    const seeLessBtn = btn.closest('.tab-content').querySelector('.see-less-btn');
-    if (seeLess) {
-        expandableContent.classList.remove('expanded');
-        seeLessBtn.style.display = 'none';
-    } else {
-        expandableContent.classList.add('expanded');
-        seeLessBtn.style.display = 'block';
-    }
+function toggleSeeMore(btn) {
+    const expandableContent = btn.parentElement;
+    expandableContent.classList.add('expanded');
 }
 
 function generateReviewsHTML(productId) {
@@ -3195,13 +3227,18 @@ function generateReviewsHTML(productId) {
         ];
     }
 
-    const reviewsList = reviews.map(review => `
+    const reviewsList = reviews.map(review => {
+        const profileLetter = review.name.charAt(0).toUpperCase();
+        return `
         <div class="review">
-            <h4>${review.name}</h4>
-            <div class="rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
-            <p>${review.comment}</p>
+            <div class="reviewer-profile-pic">${profileLetter}</div>
+            <div class="review-content">
+                <h4>${review.name}</h4>
+                <div class="rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+                <p>${review.comment}</p>
+            </div>
         </div>
-    `).join('');
+    `}).join('');
 
     const reviewFormHTML = `
         <div class="review-form-container">
@@ -3209,11 +3246,10 @@ function generateReviewsHTML(productId) {
             <form id="reviewForm">
                 <input type="hidden" name="productId" value="${productId}">
                 <div class="form-group">
-                    <label for="reviewerName">Name:</label>
-                    <input type="text" id="reviewerName" name="name" required>
+                    <input type="text" id="reviewerName" name="name" placeholder="Your Name" required>
                 </div>
-                <div class="form-group">
-                    <label>Rating:</label>
+                <div class="form-group rating-group">
+                    <span class="rating-label">Your Rating:</span>
                     <div class="rating-input">
                         <span data-value="5">☆</span>
                         <span data-value="4">☆</span>
@@ -3224,8 +3260,7 @@ function generateReviewsHTML(productId) {
                     <input type="hidden" id="reviewerRating" name="rating" required>
                 </div>
                 <div class="form-group">
-                    <label for="reviewComment">Comment:</label>
-                    <textarea id="reviewComment" name="comment" rows="4" required></textarea>
+                    <textarea id="reviewComment" name="comment" rows="3" placeholder="Write your review..." required></textarea>
                 </div>
                 <button type="submit" class="submit-review-btn">Submit Review</button>
             </form>
@@ -3241,7 +3276,6 @@ function generateReviewsHTML(productId) {
             ${reviewsList}
             ${reviews.length > 3 ? '<button class="see-more-btn" onclick="toggleSeeMore(this)">See More</button>' : ''}
         </div>
-        ${reviews.length > 3 ? '<button class="see-less-btn" onclick="toggleSeeMore(this, true)" style="display:none;">See Less</button>' : ''}
         ${reviewFormHTML}
     `;
 }
