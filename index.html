@@ -684,10 +684,9 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         }
 
         .review {
-            display: grid;
-            grid-template-columns: auto 1fr;
-            grid-template-rows: auto 1fr;
-            gap: 0.25rem 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
             padding: 1.2rem;
             margin-bottom: 1rem;
             background-color: #f8f9fa;
@@ -701,63 +700,59 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             transform: translateY(-3px);
         }
 
+        .review-left-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
         .reviewer-profile-pic {
-            grid-row: 1 / 2;
-            grid-column: 1 / 2;
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             background-color: var(--primary-color);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: bold;
-            flex-shrink: 0;
         }
 
-        .reviewer-meta {
-            grid-row: 1 / 2;
-            grid-column: 2 / 3;
-            align-self: center;
+        .review-left-col .rating {
+            display: flex;
         }
 
-        .reviewer-meta h4 {
+        .review-left-col .rating .star {
+            font-size: 1rem;
+            color: #FFC107;
+            line-height: 1;
+        }
+
+        .review-right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex-grow: 1;
+        }
+
+        .review-right-col h4 {
             margin: 0;
-            color: var(--text-color);
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             font-weight: 600;
         }
 
-        .review-date {
+        .review-right-col .review-date {
             font-size: 0.8rem;
             color: #777;
-            margin: 0;
+            margin-bottom: 0.5rem;
         }
 
-        .review .rating {
-            grid-row: 2 / 3;
-            grid-column: 1 / 2;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            margin-top: 0.5rem;
-        }
-
-        .review .rating .star {
-             font-size: 1rem;
-             color: #FFC107;
-             line-height: 1;
-        }
-
-        .review-text {
-            grid-row: 2 / 3;
-            grid-column: 2 / 3;
-            margin: 0;
-            padding-top: 0.5rem;
-            color: #454545;
+        .review-right-col .review-text {
             line-height: 1.6;
+            color: #333;
         }
 
         .review-form-container {
@@ -767,28 +762,14 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         }
 
         #reviewForm .form-group {
-            margin-bottom: 1rem;
+            margin-bottom: 1.25rem;
         }
 
         #reviewForm label {
-            display: none; /* Hide labels */
-        }
-
-        #reviewForm input[type="text"],
-        #reviewForm textarea {
-            border: 1px solid #ddd;
-            background-color: #f8f9fa;
-        }
-
-        .rating-group {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .rating-label {
+            display: block;
             font-weight: 600;
-            color: #555;
+            color: #333;
+            margin-bottom: 0.5rem;
         }
 
         #reviewForm input[type="text"],
@@ -797,6 +778,13 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             padding: 0.8rem;
             border: 1px solid #ccc;
             border-radius: 6px;
+            background-color: #fff;
+        }
+
+        .rating-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .rating-input {
@@ -810,16 +798,14 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             cursor: pointer;
         }
 
-        .rating-input:hover span {
-            color: #FFC107;
-        }
-
+        .rating-input span:hover,
         .rating-input span:hover ~ span {
-            color: #ccc;
+            color: var(--primary-color);
         }
 
-        .rating-input span.selected {
-            color: #FFC107;
+        .rating-input span[data-value].selected,
+        .rating-input span[data-value].selected ~ span {
+            color: var(--primary-color);
         }
 
         .submit-review-btn {
@@ -3271,10 +3257,9 @@ function generateReviewsHTML(productId) {
     // Add dummy reviews if no reviews are in local storage
     if (reviews.length === 0) {
         reviews = [
-            { name: 'Rahim Islam', rating: 5, date: 'July 30, 2024', comment: 'অসাধারণ একটি প্রোডাক্ট! আমার সব সমস্যার সমাধান হয়ে গেছে।' },
-            { name: 'Fatima Khatun', rating: 4, date: 'July 29, 2024', comment: 'খুবই উপকারী। তবে ইন্সটলেশন গাইডটা আরেকটু সহজ হলে ভালো হতো।' },
-            { name: 'Abdullah Al Mahmud', rating: 5, date: 'July 28, 2024', comment: 'বেস্ট সার্ভিস! আমি সবাইকে রিকমেন্ড করবো।' },
-            { name: 'Sanjida Akter', rating: 4, date: 'July 27, 2024', comment: 'প্রোডাক্টটা আমার অনেক কাজে দিয়েছে। ধন্যবাদ THINK PLUS BD।' }
+            { name: 'Rahim Islam', rating: 5, date: 'July 30, 2024', comment: 'This is the review text written by the user.' },
+            { name: 'Fatima Khatun', rating: 4, date: 'July 29, 2024', comment: 'Very helpful product, highly recommended.' },
+            { name: 'Abdullah Al Mahmud', rating: 5, date: 'July 28, 2024', comment: 'Best service! I will recommend to everyone.' }
         ];
     }
 
@@ -3286,13 +3271,15 @@ function generateReviewsHTML(productId) {
 
         return `
         <div class="review">
-            <div class="reviewer-profile-pic">${profileLetter}</div>
-            <div class="reviewer-meta">
-                <h4>${review.name}</h4>
-                <p class="review-date">Reviewed on ${review.date}</p>
+            <div class="review-left-col">
+                <div class="reviewer-profile-pic">${profileLetter}</div>
             </div>
-            <div class="rating">${starsHTML}</div>
-            <p class="review-text">${review.comment}</p>
+            <div class="review-right-col">
+                <h4>${review.name}</h4>
+                <p class="review-date">${review.date}</p>
+                <div class="rating">${starsHTML}</div>
+                <p class="review-text">${review.comment}</p>
+            </div>
         </div>
     `}).join('');
 
@@ -3302,10 +3289,11 @@ function generateReviewsHTML(productId) {
             <form id="reviewForm">
                 <input type="hidden" name="productId" value="${productId}">
                 <div class="form-group">
-                    <input type="text" id="reviewerName" name="name" placeholder="Your Name" required>
+                    <label for="reviewerName">Your Name:</label>
+                    <input type="text" id="reviewerName" name="name" required>
                 </div>
                 <div class="form-group rating-group">
-                    <span class="rating-label">Your Rating:</span>
+                    <label>Rating:</label>
                     <div class="rating-input">
                         <span data-value="1">☆</span>
                         <span data-value="2">☆</span>
@@ -3316,7 +3304,8 @@ function generateReviewsHTML(productId) {
                     <input type="hidden" id="reviewerRating" name="rating" required>
                 </div>
                 <div class="form-group">
-                    <textarea id="reviewComment" name="comment" rows="4" placeholder="Your Review" required></textarea>
+                    <label for="reviewComment">Your Review:</label>
+                    <textarea id="reviewComment" name="comment" rows="4" required></textarea>
                 </div>
                 <button type="submit" class="submit-review-btn">Submit Review</button>
             </form>
