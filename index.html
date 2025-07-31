@@ -637,6 +637,119 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         .tab-content {
             line-height: 1.7;
             color: var(--text-color);
+            white-space: pre-line;
+        }
+
+        .expandable-content {
+            max-height: 150px; /* Corresponds to about 6-7 lines */
+            overflow: hidden;
+            position: relative;
+            transition: max-height 0.5s ease-in-out;
+        }
+
+        .expandable-content.expanded {
+            max-height: 1000px; /* A large value to show all content */
+        }
+
+        .see-more-btn {
+            background: linear-gradient(to top, white, rgba(255,255,255,0));
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            padding: 1rem 0 0.5rem;
+            cursor: pointer;
+            border: none;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .expandable-content.expanded .see-more-btn {
+            display: none;
+        }
+
+        #reviewsTab .expandable-content {
+            max-height: 220px; /* about 2-3 reviews */
+        }
+        .see-less-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .review {
+            border-bottom: 1px solid #eee;
+            padding: 1rem 0;
+        }
+
+        .review:last-child {
+            border-bottom: none;
+        }
+
+        .review h4 {
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .review-form-container {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        #reviewForm .form-group {
+            margin-bottom: 1rem;
+        }
+
+        #reviewForm label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        #reviewForm input[type="text"],
+        #reviewForm textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .rating-input {
+            display: inline-block;
+            direction: rtl; /* To have stars fill from right to left */
+        }
+
+        .rating-input span {
+            font-size: 2rem;
+            color: #ccc;
+            cursor: pointer;
+        }
+
+        .rating-input span:hover,
+        .rating-input span:hover ~ span {
+            color: var(--primary-color);
+        }
+
+        .rating-input span[data-value].selected,
+        .rating-input span[data-value].selected ~ span {
+            color: var(--primary-color);
+        }
+
+        .submit-review-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
         }
 
         .checkout-page { background-color: #f8f9fa; margin: 0; min-height: calc(100vh - var(--header-height)); }
@@ -2617,6 +2730,59 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
         function setupEventListeners() {
             if (domElements.cartIcon) { domElements.cartIcon.addEventListener('click', () => { navigateTo('cart'); }); }
             if (domElements.cartClose) { domElements.cartClose.addEventListener('click', () => { domElements.cartModal.style.display = 'none'; }); }
+            document.body.addEventListener('click', function(event) {
+                if (event.target.matches('.rating-input span')) {
+                    const ratingInput = event.target.closest('.rating-input');
+                    const ratingValue = event.target.dataset.value;
+                    const hiddenInput = ratingInput.nextElementSibling;
+                    hiddenInput.value = ratingValue;
+
+                    // Update stars display
+                    const stars = ratingInput.querySelectorAll('span');
+                    stars.forEach(star => {
+                        star.classList.remove('selected');
+                    });
+
+                    event.target.classList.add('selected');
+                    let sibling = event.target.nextElementSibling;
+                    while(sibling) {
+                        sibling.classList.add('selected');
+                        sibling = sibling.nextElementSibling;
+                    }
+                }
+            });
+
+            document.body.addEventListener('submit', function(event) {
+                if (event.target.id === 'reviewForm') {
+                    event.preventDefault();
+                    const form = event.target;
+                    const productId = form.querySelector('[name="productId"]').value;
+                    const name = form.querySelector('[name="name"]').value;
+                    const rating = form.querySelector('[name="rating"]').value;
+                    const comment = form.querySelector('[name="comment"]').value;
+
+                    if (!rating) {
+                        showToast('Please select a rating.', 'error');
+                        return;
+                    }
+
+                    const newReview = { name, rating: parseInt(rating), comment };
+
+                    // Save to local storage
+                    let reviews = JSON.parse(localStorage.getItem(`reviews_${productId}`)) || [];
+                    reviews.push(newReview);
+                    localStorage.setItem(`reviews_${productId}`, JSON.stringify(reviews));
+
+                    showToast('Review submitted successfully!', 'success');
+                    form.reset();
+
+                    // Refresh the reviews section
+                    const reviewsContainer = document.getElementById('reviewsTab');
+                    if (reviewsContainer) {
+                        reviewsContainer.innerHTML = generateReviewsHTML(productId);
+                    }
+                }
+            });
             if (domElements.checkoutBtnCart) { domElements.checkoutBtnCart.addEventListener('click', () => { if (cart.length === 0) { showToast('Your cart is empty! Cannot proceed to checkout.', 'error'); return; } domElements.cartModal.style.display = 'none'; navigateTo('checkout', null, null, true); }); }
             window.addEventListener('click', (event) => { if (domElements.cartModal && event.target === domElements.cartModal) { domElements.cartModal.style.display = 'none'; } });
             if (domElements.contactFabMain) { domElements.contactFabMain.addEventListener('click', (e) => { e.stopPropagation(); domElements.fabContainer.classList.toggle('active'); }); }
@@ -2901,10 +3067,14 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
                 <button class="tab-link" onclick="openTab(event, 'reviewsTab')">Reviews</button>
             </div>
             <div id="descriptionTab" class="tab-content" style="display:block;">
-                <p>${product.longDescription || product.description || 'An exceptional digital product.'}</p>
+                <div class="expandable-content">
+                    <p>${product.longDescription || product.description || 'An exceptional digital product.'}</p>
+                    <button class="see-more-btn" onclick="toggleSeeMore(this)">See More</button>
+                </div>
+                <button class="see-less-btn" onclick="toggleSeeMore(this, true)" style="display:none;">See Less</button>
             </div>
             <div id="reviewsTab" class="tab-content" style="display:none;">
-                <p>No reviews yet for this product.</p>
+                ${generateReviewsHTML(product.id)}
             </div>
         </div>`;
 
@@ -3000,6 +3170,80 @@ function openTab(evt, tabName) {
     }
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.className += " active";
+}
+
+function toggleSeeMore(btn, seeLess = false) {
+    const expandableContent = btn.closest('.tab-content').querySelector('.expandable-content');
+    const seeLessBtn = btn.closest('.tab-content').querySelector('.see-less-btn');
+    if (seeLess) {
+        expandableContent.classList.remove('expanded');
+        seeLessBtn.style.display = 'none';
+    } else {
+        expandableContent.classList.add('expanded');
+        seeLessBtn.style.display = 'block';
+    }
+}
+
+function generateReviewsHTML(productId) {
+    let reviews = JSON.parse(localStorage.getItem(`reviews_${productId}`)) || [];
+    // Add dummy reviews if no reviews are in local storage
+    if (reviews.length === 0) {
+        reviews = [
+            { name: 'John Doe', rating: 5, comment: 'This is a great product! Highly recommended.' },
+            { name: 'Jane Smith', rating: 4, comment: 'I\'m very happy with my purchase. It exceeded my expectations.' },
+            { name: 'Peter Jones', rating: 3, comment: 'Good value for the price. I would buy it again.' },
+        ];
+    }
+
+    const reviewsList = reviews.map(review => `
+        <div class="review">
+            <h4>${review.name}</h4>
+            <div class="rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</div>
+            <p>${review.comment}</p>
+        </div>
+    `).join('');
+
+    const reviewFormHTML = `
+        <div class="review-form-container">
+            <h3>Leave a Review</h3>
+            <form id="reviewForm">
+                <input type="hidden" name="productId" value="${productId}">
+                <div class="form-group">
+                    <label for="reviewerName">Name:</label>
+                    <input type="text" id="reviewerName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Rating:</label>
+                    <div class="rating-input">
+                        <span data-value="5">☆</span>
+                        <span data-value="4">☆</span>
+                        <span data-value="3">☆</span>
+                        <span data-value="2">☆</span>
+                        <span data-value="1">☆</span>
+                    </div>
+                    <input type="hidden" id="reviewerRating" name="rating" required>
+                </div>
+                <div class="form-group">
+                    <label for="reviewComment">Comment:</label>
+                    <textarea id="reviewComment" name="comment" rows="4" required></textarea>
+                </div>
+                <button type="submit" class="submit-review-btn">Submit Review</button>
+            </form>
+        </div>
+    `;
+
+    if (reviews.length === 0) {
+        return reviewFormHTML;
+    }
+
+    return `
+        <div class="expandable-content">
+            ${reviewsList}
+            ${reviews.length > 3 ? '<button class="see-more-btn" onclick="toggleSeeMore(this)">See More</button>' : ''}
+        </div>
+        ${reviews.length > 3 ? '<button class="see-less-btn" onclick="toggleSeeMore(this, true)" style="display:none;">See Less</button>' : ''}
+        ${reviewFormHTML}
+    `;
 }
 
         function getRelatedProducts(currentProductId, category, limit = 4) { const dataToUse = (allProductsData && allProductsData.length > 0) ? allProductsData : generateDemoProducts(); if (!dataToUse || dataToUse.length === 0) return []; const relatedProducts = dataToUse.filter(product => product.category === category && product.id !== currentProductId); const shuffled = relatedProducts.sort(() => Math.random() - 0.5); return shuffled.slice(0, limit); }
