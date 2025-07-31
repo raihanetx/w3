@@ -520,6 +520,65 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         .related-product-price { font-size: 1.1rem; font-weight: 700; color: var(--primary-color); margin-top: auto; }
         .related-product-actions { display: none !important; }
 
+        .product-detail-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .product-detail-gallery {
+            width: 100%;
+        }
+
+        .product-detail-main {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-short-description {
+            font-size: 1rem;
+            color: #555;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .product-info-tabs {
+            margin-top: 2rem;
+            border-top: 1px solid #eee;
+            padding-top: 2rem;
+        }
+
+        .tab-headers {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-link {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #777;
+            position: relative;
+            bottom: -2px;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-link.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            line-height: 1.7;
+            color: var(--text-color);
+        }
+
         .checkout-page { background-color: #f8f9fa; margin: 0; min-height: calc(100vh - var(--header-height)); }
         .page#checkoutPage.active { display: flex; justify-content: center; align-items: flex-start; padding: 1.5rem 1.25rem; }
         .checkout-container { background-color: #ffffff; padding: 30px 35px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); width: 100%; max-width: 550px; border: 1px solid #e0e0e0; margin: 1rem auto; position: relative; }
@@ -809,6 +868,16 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             .page#checkoutPage.active { padding: 2rem 1.25rem; }
             .products-page { margin: 2rem auto; max-width: 1200px; }
             .product-detail-page { margin: 2rem auto; max-width: 1100px; padding: 2rem 1.25rem;}
+            .product-detail-layout {
+                grid-template-columns: 1fr 1.2fr; /* Two columns for desktop */
+                gap: 3rem;
+            }
+
+            .product-detail-gallery {
+                position: sticky;
+                top: 100px;
+                align-self: start;
+            }
             .skeleton-cards-container { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; }
             .cart-page { margin: 2rem auto; max-width: 800px; }
             .footer-content { grid-template-columns: 2fr 1.2fr 1.2fr; gap: 3rem; align-items: start; max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
@@ -2723,20 +2792,164 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
         }
 
         function showProductDetail(productId) {
-            let product = getProductById(productId); const detailPageElement = domElements.pages.productDetail; if (!product || !detailPageElement) { console.error(`Product ${productId} not found or detail page missing.`); showToast('Product details unavailable.', 'error'); navigateTo('products', 'all'); return; }
-            product = { ...product }; delete product.currentSelectedPrice;
-            const imageContainer = document.createElement('div'); imageContainer.className = 'product-detail-main-image-container'; const skeletonDiv = document.createElement('div'); skeletonDiv.className = 'skeleton'; imageContainer.appendChild(skeletonDiv); const placeholderTextSpan = document.createElement('span'); placeholderTextSpan.className = 'image-placeholder-text'; placeholderTextSpan.style.display = 'none'; placeholderTextSpan.textContent = `Image for ${product.name}`; imageContainer.appendChild(placeholderTextSpan);
-            if (product.image && product.image !== 'path/to/default-product-image.jpg') { const img = document.createElement('img'); img.src = product.image; img.alt = product.name; img.className = 'image-fade-in'; imageContainer.appendChild(img); setupSingleImageLoading(img); } else { skeletonDiv.style.display = 'none'; placeholderTextSpan.style.display = 'block'; }
-            let durationSelectorHTML = ''; let currentPrice = parseFloat(product.price);
-            if (product.category === 'subscription' && Array.isArray(product.durations) && product.durations.length > 0) { currentPrice = parseFloat(product.durations[0].price); durationSelectorHTML = `<div class="duration-selector" style="margin-bottom:0.75rem;display:block;"><label for="duration-detail-${product.id}" style="font-weight:600;margin-bottom:0.5rem;display:block;">Select Duration:</label><select id="duration-detail-${product.id}" data-product-id="${product.id}" style="width:100%;padding:0.7rem;border:1px solid #ccc;border-radius:6px;font-size:1rem;">${product.durations.map(d => `<option value="${parseFloat(d.price)}" ${parseFloat(d.price) === currentPrice ? 'selected' : ''}>${d.label} - ৳${parseFloat(d.price).toFixed(2)}</option>`).join('')}</select></div>`; }
-            const relatedProductsHTML = renderRelatedProductsSection(product.id, product.category);
-            const tempImageDiv = document.createElement('div'); tempImageDiv.appendChild(imageContainer);
-            detailPageElement.innerHTML = `<div class="product-detail-container"><div class="product-detail-images">${tempImageDiv.innerHTML}</div><div class="product-detail-info"><h2 class="product-detail-title">${product.name || 'N/A'}</h2><p class="product-detail-description">${product.longDescription || product.description || 'An exceptional digital product.'}</p><div class="product-detail-price">৳${currentPrice.toFixed(2)}</div>${durationSelectorHTML}<div class="product-detail-actions"><button class="buy-now-detail" data-id="${product.id}"><i class="fas fa-bolt"></i> Buy Now</button><button class="add-to-cart-detail" data-id="${product.id}"><i class="fas fa-cart-plus"></i> Add to Cart</button></div></div></div>${relatedProductsHTML}`;
-            const detailDurationSelector = detailPageElement.querySelector(`#duration-detail-${product.id}`); if (detailDurationSelector) { detailDurationSelector.addEventListener('change', (e) => { const newPrice = parseFloat(e.target.value); const priceElement = detailPageElement.querySelector('.product-detail-price'); if (priceElement) priceElement.textContent = `৳${newPrice.toFixed(2)}`; }); }
-            const buyNowDetailButton = detailPageElement.querySelector('.buy-now-detail'); if (buyNowDetailButton) { buyNowDetailButton.addEventListener('click', (e) => { const productId = parseInt(e.currentTarget.dataset.id); const productForCart = getProductById(productId); if (productForCart) { const productToBuy = { ...productForCart }; const durationSel = document.getElementById(`duration-detail-${productId}`); if (durationSel && durationSel.value) { const selectedOption = durationSel.options[durationSel.selectedIndex]; productToBuy.price = parseFloat(selectedOption.value); productToBuy.selectedDurationLabel = selectedOption.text.split(' - ')[0]; } else if (Array.isArray(productToBuy.durations) && productToBuy.durations.length > 0) { productToBuy.price = parseFloat(productToBuy.durations[0].price); productToBuy.selectedDurationLabel = productToBuy.durations[0].label; } cart = [{ ...productToBuy, quantity: 1 }]; updateCart(); navigateTo('checkout', null, null, true); } }); }
-            const addToCartDetailButton = detailPageElement.querySelector('.add-to-cart-detail'); if (addToCartDetailButton) { addToCartDetailButton.addEventListener('click', (e) => { const productId = parseInt(e.currentTarget.dataset.id); const productForCart = getProductById(productId); if(productForCart) { const productToAdd = { ...productForCart }; const durationSel = document.getElementById(`duration-detail-${productId}`); if (durationSel && durationSel.value) { const selectedOption = durationSel.options[durationSel.selectedIndex]; productToAdd.price = parseFloat(selectedOption.value); } else if (Array.isArray(productToAdd.durations) && productToAdd.durations.length > 0) { productToAdd.price = parseFloat(productToAdd.durations[0].price); } addToCart(productToAdd); } }); }
-            setupRelatedProductImages();
-        }
+    let product = getProductById(productId);
+    const detailPageElement = domElements.pages.productDetail;
+    if (!product || !detailPageElement) {
+        console.error(`Product ${productId} not found or detail page missing.`);
+        showToast('Product details unavailable.', 'error');
+        navigateTo('products', 'all');
+        return;
+    }
+
+    product = { ...product };
+    delete product.currentSelectedPrice;
+
+    // Image container
+    const imageContainer = document.createElement('div');
+    imageContainer.className = 'product-detail-main-image-container';
+    const skeletonDiv = document.createElement('div');
+    skeletonDiv.className = 'skeleton';
+    imageContainer.appendChild(skeletonDiv);
+    const placeholderTextSpan = document.createElement('span');
+    placeholderTextSpan.className = 'image-placeholder-text';
+    placeholderTextSpan.style.display = 'none';
+    placeholderTextSpan.textContent = `Image for ${product.name}`;
+    imageContainer.appendChild(placeholderTextSpan);
+
+    if (product.image && product.image !== 'path/to/default-product-image.jpg') {
+        const img = document.createElement('img');
+        img.src = product.image;
+        img.alt = product.name;
+        img.className = 'image-fade-in';
+        imageContainer.appendChild(img);
+        setupSingleImageLoading(img);
+    } else {
+        skeletonDiv.style.display = 'none';
+        placeholderTextSpan.style.display = 'block';
+    }
+
+    // Duration selector and price
+    let durationSelectorHTML = '';
+    let currentPrice = parseFloat(product.price);
+    if (product.category === 'subscription' && Array.isArray(product.durations) && product.durations.length > 0) {
+        currentPrice = parseFloat(product.durations[0].price);
+        durationSelectorHTML = `
+            <div class="duration-selector" style="margin-bottom:0.75rem;display:block;">
+                <label for="duration-detail-${product.id}" style="font-weight:600;margin-bottom:0.5rem;display:block;">Select Duration:</label>
+                <select id="duration-detail-${product.id}" data-product-id="${product.id}" style="width:100%;padding:0.7rem;border:1px solid #ccc;border-radius:6px;font-size:1rem;">
+                    ${product.durations.map(d => `<option value="${parseFloat(d.price)}" ${parseFloat(d.price) === currentPrice ? 'selected' : ''}>${d.label} - ৳${parseFloat(d.price).toFixed(2)}</option>`).join('')}
+                </select>
+            </div>`;
+    }
+
+    // Tabs for description and reviews
+    const tabsHTML = `
+        <div class="product-info-tabs">
+            <div class="tab-headers">
+                <button class="tab-link active" onclick="openTab(event, 'descriptionTab')">Description</button>
+                <button class="tab-link" onclick="openTab(event, 'reviewsTab')">Reviews</button>
+            </div>
+            <div id="descriptionTab" class="tab-content" style="display:block;">
+                <p>${product.longDescription || product.description || 'An exceptional digital product.'}</p>
+            </div>
+            <div id="reviewsTab" class="tab-content" style="display:none;">
+                <p>No reviews yet for this product.</p>
+            </div>
+        </div>`;
+
+    // Related products
+    const relatedProductsHTML = renderRelatedProductsSection(product.id, product.category);
+
+    const tempImageDiv = document.createElement('div');
+    tempImageDiv.appendChild(imageContainer);
+
+    detailPageElement.innerHTML = `
+        <div class="product-detail-layout">
+            <div class="product-detail-gallery">
+                ${tempImageDiv.innerHTML}
+            </div>
+            <div class="product-detail-main">
+                <h2 class="product-detail-title">${product.name || 'N/A'}</h2>
+                <p class="product-short-description">${product.description || ''}</p>
+                <div class="product-detail-price">৳${currentPrice.toFixed(2)}</div>
+                ${durationSelectorHTML}
+                <div class="product-detail-actions">
+                    <button class="buy-now-detail" data-id="${product.id}"><i class="fas fa-bolt"></i> Buy Now</button>
+                    <button class="add-to-cart-detail" data-id="${product.id}"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+                </div>
+            </div>
+        </div>
+        ${tabsHTML}
+        ${relatedProductsHTML}`;
+
+    // Event listeners
+    const detailDurationSelector = detailPageElement.querySelector(`#duration-detail-${product.id}`);
+    if (detailDurationSelector) {
+        detailDurationSelector.addEventListener('change', (e) => {
+            const newPrice = parseFloat(e.target.value);
+            const priceElement = detailPageElement.querySelector('.product-detail-price');
+            if (priceElement) priceElement.textContent = `৳${newPrice.toFixed(2)}`;
+        });
+    }
+
+    const buyNowDetailButton = detailPageElement.querySelector('.buy-now-detail');
+    if (buyNowDetailButton) {
+        buyNowDetailButton.addEventListener('click', (e) => {
+            const productId = parseInt(e.currentTarget.dataset.id);
+            const productForCart = getProductById(productId);
+            if (productForCart) {
+                const productToBuy = { ...productForCart };
+                const durationSel = document.getElementById(`duration-detail-${productId}`);
+                if (durationSel && durationSel.value) {
+                    const selectedOption = durationSel.options[durationSel.selectedIndex];
+                    productToBuy.price = parseFloat(selectedOption.value);
+                    productToBuy.selectedDurationLabel = selectedOption.text.split(' - ')[0];
+                } else if (Array.isArray(productToBuy.durations) && productToBuy.durations.length > 0) {
+                    productToBuy.price = parseFloat(productToBuy.durations[0].price);
+                    productToBuy.selectedDurationLabel = productToBuy.durations[0].label;
+                }
+                cart = [{ ...productToBuy, quantity: 1 }];
+                updateCart();
+                navigateTo('checkout', null, null, true);
+            }
+        });
+    }
+
+    const addToCartDetailButton = detailPageElement.querySelector('.add-to-cart-detail');
+    if (addToCartDetailButton) {
+        addToCartDetailButton.addEventListener('click', (e) => {
+            const productId = parseInt(e.currentTarget.dataset.id);
+            const productForCart = getProductById(productId);
+            if(productForCart) {
+                const productToAdd = { ...productForCart };
+                const durationSel = document.getElementById(`duration-detail-${productId}`);
+                if (durationSel && durationSel.value) {
+                    const selectedOption = durationSel.options[durationSel.selectedIndex];
+                    productToAdd.price = parseFloat(selectedOption.value);
+                } else if (Array.isArray(productToAdd.durations) && productToAdd.durations.length > 0) {
+                    productToAdd.price = parseFloat(productToAdd.durations[0].price);
+                }
+                addToCart(productToAdd);
+            }
+        });
+    }
+
+    setupRelatedProductImages();
+}
+
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tab-link");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+}
 
         function getRelatedProducts(currentProductId, category, limit = 4) { const dataToUse = (allProductsData && allProductsData.length > 0) ? allProductsData : generateDemoProducts(); if (!dataToUse || dataToUse.length === 0) return []; const relatedProducts = dataToUse.filter(product => product.category === category && product.id !== currentProductId); const shuffled = relatedProducts.sort(() => Math.random() - 0.5); return shuffled.slice(0, limit); }
         function renderRelatedProductsSection(currentProductId, category) {
