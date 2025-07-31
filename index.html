@@ -685,8 +685,8 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
 
         .review {
             display: flex;
-            align-items: flex-start;
-            gap: 1rem;
+            flex-direction: column;
+            gap: 0.5rem;
             padding: 1.2rem;
             margin-bottom: 1rem;
             background-color: #f8f9fa;
@@ -700,57 +700,53 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             transform: translateY(-3px);
         }
 
-        .review-left-col {
+        .review-header {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            flex-shrink: 0;
+            gap: 0.75rem;
         }
 
         .reviewer-profile-pic {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             background-color: var(--primary-color);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: bold;
+            flex-shrink: 0;
         }
 
-        .review-left-col .rating {
-            display: flex;
-        }
-
-        .review-left-col .rating .star {
-            font-size: 1rem;
-            color: #FFC107;
-            line-height: 1;
-        }
-
-        .review-right-col {
+        .reviewer-meta {
             display: flex;
             flex-direction: column;
-            gap: 0.25rem;
-            flex-grow: 1;
         }
 
-        .review-right-col h4 {
+        .reviewer-meta h4 {
             margin: 0;
             font-size: 1.1rem;
             font-weight: 600;
         }
 
-        .review-right-col .review-date {
+        .reviewer-meta .review-date {
             font-size: 0.8rem;
             color: #777;
-            margin-bottom: 0.5rem;
         }
 
-        .review-right-col .review-text {
+        .review .rating {
+            display: flex;
+        }
+
+        .review .rating .star {
+            font-size: 1.1rem;
+            color: #FFC107;
+            line-height: 1;
+        }
+
+        .review-text {
             line-height: 1.6;
             color: #333;
         }
@@ -762,14 +758,28 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         }
 
         #reviewForm .form-group {
-            margin-bottom: 1.25rem;
+            margin-bottom: 1rem;
         }
 
         #reviewForm label {
-            display: block;
+            display: none; /* Hide labels */
+        }
+
+        #reviewForm input[type="text"],
+        #reviewForm textarea {
+            border: 1px solid #ddd;
+            background-color: #f8f9fa;
+        }
+
+        .rating-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .rating-label {
             font-weight: 600;
-            color: #333;
-            margin-bottom: 0.5rem;
+            color: #555;
         }
 
         #reviewForm input[type="text"],
@@ -778,13 +788,6 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
             padding: 0.8rem;
             border: 1px solid #ccc;
             border-radius: 6px;
-            background-color: #fff;
-        }
-
-        .rating-group {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
         }
 
         .rating-input {
@@ -2803,20 +2806,21 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
                 if (event.target.matches('.rating-input span')) {
                     const ratingInput = event.target.closest('.rating-input');
                     const ratingValue = event.target.dataset.value;
-                const hiddenInput = ratingInput.nextElementSibling; // This should be the hidden input
+                    const hiddenInput = ratingInput.nextElementSibling;
                     hiddenInput.value = ratingValue;
 
                     // Update stars display
-                const stars = Array.from(ratingInput.querySelectorAll('span'));
-                const clickedIndex = stars.findIndex(star => star === event.target);
-
-                stars.forEach((star, index) => {
-                    if (index <= clickedIndex) {
-                        star.classList.add('selected');
-                    } else {
+                    const stars = ratingInput.querySelectorAll('span');
+                    stars.forEach(star => {
                         star.classList.remove('selected');
-                    }
                     });
+
+                    event.target.classList.add('selected');
+                    let sibling = event.target.nextElementSibling;
+                    while(sibling) {
+                        sibling.classList.add('selected');
+                        sibling = sibling.nextElementSibling;
+                    }
                 }
             });
 
@@ -3257,9 +3261,9 @@ function generateReviewsHTML(productId) {
     // Add dummy reviews if no reviews are in local storage
     if (reviews.length === 0) {
         reviews = [
-            { name: 'Rahim Islam', rating: 5, date: 'July 30, 2024', comment: 'This is the review text written by the user.' },
-            { name: 'Fatima Khatun', rating: 4, date: 'July 29, 2024', comment: 'Very helpful product, highly recommended.' },
-            { name: 'Abdullah Al Mahmud', rating: 5, date: 'July 28, 2024', comment: 'Best service! I will recommend to everyone.' }
+            { name: 'John Doe', rating: 5, date: 'July 30, 2025', comment: 'Great product, very happy with my purchase!' },
+            { name: 'Jane Smith', rating: 4, date: 'July 29, 2024', comment: 'Very helpful product, highly recommended.' },
+            { name: 'Peter Jones', rating: 5, date: 'July 28, 2024', comment: 'Best service! I will recommend to everyone.' }
         ];
     }
 
@@ -3271,15 +3275,15 @@ function generateReviewsHTML(productId) {
 
         return `
         <div class="review">
-            <div class="review-left-col">
+            <div class="review-header">
                 <div class="reviewer-profile-pic">${profileLetter}</div>
+                <div class="reviewer-meta">
+                    <h4>${review.name}</h4>
+                    <p class="review-date">${review.date}</p>
+                </div>
             </div>
-            <div class="review-right-col">
-                <h4>${review.name}</h4>
-                <p class="review-date">${review.date}</p>
-                <div class="rating">${starsHTML}</div>
-                <p class="review-text">${review.comment}</p>
-            </div>
+            <div class="rating">${starsHTML}</div>
+            <p class="review-text">${review.comment}</p>
         </div>
     `}).join('');
 
@@ -3289,23 +3293,21 @@ function generateReviewsHTML(productId) {
             <form id="reviewForm">
                 <input type="hidden" name="productId" value="${productId}">
                 <div class="form-group">
-                    <label for="reviewerName">Your Name:</label>
-                    <input type="text" id="reviewerName" name="name" required>
+                    <input type="text" id="reviewerName" name="name" placeholder="Your Name" required>
                 </div>
                 <div class="form-group rating-group">
-                    <label>Rating:</label>
+                    <span class="rating-label">Your Rating:</span>
                     <div class="rating-input">
-                        <span data-value="1">☆</span>
-                        <span data-value="2">☆</span>
-                        <span data-value="3">☆</span>
-                        <span data-value="4">☆</span>
                         <span data-value="5">☆</span>
+                        <span data-value="4">☆</span>
+                        <span data-value="3">☆</span>
+                        <span data-value="2">☆</span>
+                        <span data-value="1">☆</span>
                     </div>
                     <input type="hidden" id="reviewerRating" name="rating" required>
                 </div>
                 <div class="form-group">
-                    <label for="reviewComment">Your Review:</label>
-                    <textarea id="reviewComment" name="comment" rows="4" required></textarea>
+                    <textarea id="reviewComment" name="comment" rows="3" placeholder="Write your review..." required></textarea>
                 </div>
                 <button type="submit" class="submit-review-btn">Submit Review</button>
             </form>
