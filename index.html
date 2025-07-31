@@ -641,7 +641,7 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         }
 
         .expandable-content {
-            max-height: 150px; /* Corresponds to about 6-7 lines */
+            max-height: 10rem; /* about 6 lines */
             overflow: hidden;
             position: relative;
             transition: max-height 0.5s ease-in-out;
@@ -652,7 +652,6 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
         }
 
         .see-more-btn {
-            background: linear-gradient(to top, white, rgba(255,255,255,0));
             position: absolute;
             bottom: 0;
             left: 0;
@@ -667,6 +666,16 @@ src="https://www.facebook.com/tr?id=482675157669768&ev=PageView&noscript=1"
 
         .expandable-content.expanded .see-more-btn {
             display: none;
+        }
+
+        .see-less-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
         }
 
         #reviewsTab .expandable-content {
@@ -3098,6 +3107,7 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
                     <p>${product.longDescription || product.description || 'An exceptional digital product.'}</p>
                     <button class="see-more-btn" onclick="toggleSeeMore(this)">See More</button>
                 </div>
+                <button class="see-less-btn" onclick="toggleSeeMore(this, true)" style="display:none;">See Less</button>
             </div>
             <div id="reviewsTab" class="tab-content" style="display:none;">
                 ${generateReviewsHTML(product.id)}
@@ -3181,19 +3191,6 @@ Microsoft-এর অফিসিয়াল Activation Key, ইমেইলে ড
         });
     }
 
-    // Show "See More" buttons only if content overflows
-    const descriptionContent = detailPageElement.querySelector('#descriptionTab .expandable-content');
-    if (descriptionContent.scrollHeight <= 150) { // 150 is the max-height
-        const seeMoreBtn = descriptionContent.querySelector('.see-more-btn');
-        if (seeMoreBtn) seeMoreBtn.style.display = 'none';
-    }
-
-    const reviewsContent = detailPageElement.querySelector('#reviewsTab .expandable-content');
-    if (reviewsContent && reviewsContent.scrollHeight <= 220) { // 220 is the max-height
-        const seeMoreBtn = reviewsContent.querySelector('.see-more-btn');
-        if (seeMoreBtn) seeMoreBtn.style.display = 'none';
-    }
-
     setupRelatedProductImages();
 }
 
@@ -3211,9 +3208,16 @@ function openTab(evt, tabName) {
     evt.currentTarget.className += " active";
 }
 
-function toggleSeeMore(btn) {
-    const expandableContent = btn.parentElement;
-    expandableContent.classList.add('expanded');
+function toggleSeeMore(btn, seeLess = false) {
+    const expandableContent = btn.closest('.tab-content').querySelector('.expandable-content');
+    const seeLessBtn = btn.closest('.tab-content').querySelector('.see-less-btn');
+    if (seeLess) {
+        expandableContent.classList.remove('expanded');
+        seeLessBtn.style.display = 'none';
+    } else {
+        expandableContent.classList.add('expanded');
+        seeLessBtn.style.display = 'block';
+    }
 }
 
 function generateReviewsHTML(productId) {
@@ -3224,6 +3228,10 @@ function generateReviewsHTML(productId) {
             { name: 'John Doe', rating: 5, comment: 'This is a great product! Highly recommended.' },
             { name: 'Jane Smith', rating: 4, comment: 'I\'m very happy with my purchase. It exceeded my expectations.' },
             { name: 'Peter Jones', rating: 3, comment: 'Good value for the price. I would buy it again.' },
+            { name: 'Sarah Miller', rating: 2, comment: 'Not bad, but could be better. The instructions were a bit confusing.' },
+            { name: 'Mike Brown', rating: 5, comment: 'Excellent product, fast delivery.' },
+            { name: 'Emily Davis', rating: 4, comment: 'I use this every day. It\'s a lifesaver!' },
+            { name: 'Chris Wilson', rating: 5, comment: 'A must-have for anyone in the industry.' },
         ];
     }
 
@@ -3276,6 +3284,7 @@ function generateReviewsHTML(productId) {
             ${reviewsList}
             ${reviews.length > 3 ? '<button class="see-more-btn" onclick="toggleSeeMore(this)">See More</button>' : ''}
         </div>
+        ${reviews.length > 3 ? '<button class="see-less-btn" onclick="toggleSeeMore(this, true)" style="display:none;">See Less</button>' : ''}
         ${reviewFormHTML}
     `;
 }
